@@ -121,7 +121,7 @@ Settings are stored in `%USERPROFILE%\.phone-keep-awake\config.json`:
 ```json
 {
   "targetDeviceId": "ZA223PXXMC",
-  "intervalSeconds": 10,
+  "intervalSeconds": 4,
   "autoWakeOnConnect": true,
   "enableLogging": true,
   "maxLogSizeBytes": 1048576
@@ -131,7 +131,7 @@ Settings are stored in `%USERPROFILE%\.phone-keep-awake\config.json`:
 | Setting | Default | Description |
 | :--- | :--- | :--- |
 | `targetDeviceId` | `""` | Device serial number. If blank, auto-detects the first connected authorized device. |
-| `intervalSeconds` | `10` | Frequency (in seconds) of the keep-alive pulse. |
+| `intervalSeconds` | `4` | Frequency (in seconds) of keep-alive pulse. Set to 4s to stay ahead of Android's 6-7s lock screen timeout. |
 | `autoWakeOnConnect`| `true` | Automatically wakes the screen if off/dozing upon plugging in. |
 | `enableLogging` | `true` | Writes timestamped events to `daemon.log`. |
 | `maxLogSizeBytes` | `1048576` | Log rotation limit (default: 1 MB). |

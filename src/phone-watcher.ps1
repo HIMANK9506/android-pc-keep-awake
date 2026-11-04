@@ -28,7 +28,7 @@ if (-not $ConfigFile) {
 
 $config = @{
     targetDeviceId    = ""
-    intervalSeconds   = 10
+    intervalSeconds   = 4
     autoWakeOnConnect = $true
     enableLogging     = $true
     maxLogSizeBytes   = 1048576
