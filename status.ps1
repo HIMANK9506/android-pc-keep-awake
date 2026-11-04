@@ -52,7 +52,7 @@ if (-not $adb) {
     Write-Host "  ADB Status:    NOT FOUND" -ForegroundColor Red
 } else {
     $devicesOutput = & $adb devices 2>$null
-    $deviceLines = ($devicesOutput -split "`r?`n") | Where-Object { $_ -match "\bdevice\b" -and $_ -notmatch "List of devices" }
+    $deviceLines = @(($devicesOutput -split "`r?`n") | Where-Object { $_ -match "\bdevice\b" -and $_ -notmatch "List of devices" })
 
     if ($deviceLines.Count -eq 0) {
         Write-Host "  Connected:     NO" -ForegroundColor Yellow
@@ -63,11 +63,14 @@ if (-not $adb) {
             Write-Host "  Physical USB:  Not detected" -ForegroundColor Gray
         }
     } else {
-        $devId = ($deviceLines[0] -split "\s+")[0]
-        $model = (& $adb -s $devId shell getprop ro.product.model 2>$null).Trim()
-        $battery = (& $adb -s $devId shell "dumpsys battery | grep level" 2>$null) -replace "[^0-9]",""
-        $status = (& $adb -s $devId shell "cat /sys/class/power_supply/battery/status 2>/dev/null").Trim()
-        $wake = (& $adb -s $devId shell "dumpsys power | grep 'mWakefulness='" 2>$null)
+        $devId = ($deviceLines[0] -split '\s+')[0].Trim()
+        $model = (& $adb -s $devId shell getprop ro.product.model 2>$null)
+        if ($model) { $model = $model.Trim() }
+        $battery = (& $adb -s $devId shell "cat /sys/class/power_supply/battery/capacity 2>/dev/null")
+        if ($battery) { $battery = $battery.Trim() }
+        $status = (& $adb -s $devId shell "cat /sys/class/power_supply/battery/status 2>/dev/null")
+        if ($status) { $status = $status.Trim() }
+        $wake = (& $adb -s $devId shell "dumpsys power | grep 'mWakefulness='" 2>$null) -join " "
 
         $wakeStr = if ($wake -match "mWakefulness=Awake") { "AWAKE (Screen On)" } elseif ($wake -match "mWakefulness=Dozing") { "DOZING (Ambient / Screen Off)" } else { "ASLEEP" }
 

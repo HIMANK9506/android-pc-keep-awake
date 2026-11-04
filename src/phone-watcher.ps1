@@ -163,7 +163,7 @@ $lastConnectedState = $false
 while ($true) {
     try {
         $res = Invoke-AdbTimeout -Arguments @("devices") -TimeoutSeconds 4
-        $deviceLines = ($res.Stdout -split "`r?`n") | Where-Object { $_ -match "\bdevice\b" -and $_ -notmatch "List of devices" }
+        $deviceLines = @(($res.Stdout -split "`r?`n") | Where-Object { $_ -match "\bdevice\b" -and $_ -notmatch "List of devices" })
 
         # Resolve active device
         $activeDevice = $null

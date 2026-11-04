@@ -31,11 +31,12 @@ $targetDevice = ""
 if ($adb -and (Test-Path $adb)) {
     & $adb start-server 2>$null
     $rawDevices = & $adb devices 2>$null
-    $deviceLines = ($rawDevices -split "`r?`n") | Where-Object { $_ -match "\bdevice\b" -and $_ -notmatch "List of devices" }
+    $deviceLines = @(($rawDevices -split "`r?`n") | Where-Object { $_ -match "\bdevice\b" -and $_ -notmatch "List of devices" })
 
     if ($deviceLines.Count -gt 0) {
-        $devId = ($deviceLines[0] -split "\s+")[0]
-        $model = (& $adb -s $devId shell getprop ro.product.model 2>$null).Trim()
+        $devId = ($deviceLines[0] -split '\s+')[0].Trim()
+        $model = (& $adb -s $devId shell getprop ro.product.model 2>$null)
+        if ($model) { $model = $model.Trim() }
         Write-Host "[+] Detected connected device: $model (ID: $devId)" -ForegroundColor Green
         $targetDevice = $devId
     } else {
