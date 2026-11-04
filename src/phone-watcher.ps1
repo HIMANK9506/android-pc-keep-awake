@@ -1,14 +1,14 @@
 <#
 .SYNOPSIS
-    Android PC Keep-Awake Daemon
+    Android PC Keep-Awake Daemon (Resilient Version)
 .DESCRIPTION
     Monitors Android USB connection and keeps the device screen awake
     ONLY while connected to this specific computer.
 #>
 
 param(
-    [string]$TargetDevice = "",
-    [int]$IntervalSec = 3
+    [string]$TargetDevice = "ZA223PXXMC",
+    [int]$IntervalSec = 10
 )
 
 # 1. Locate ADB executable
@@ -27,7 +27,6 @@ function Find-Adb {
         if (Test-Path $path) { return $path }
     }
 
-    # Deep search in WinGet packages as fallback
     $wingetMatch = Get-ChildItem -Path "$env:LOCALAPPDATA\Microsoft\WinGet" -Recurse -Filter "adb.exe" -ErrorAction SilentlyContinue | Select-Object -First 1
     if ($wingetMatch) { return $wingetMatch.FullName }
 
@@ -41,6 +40,8 @@ if (-not $adb) {
 }
 
 # 2. Main Keep-Awake Loop
+$consecutiveFailures = 0
+
 while ($true) {
     try {
         $rawDevices = & $adb devices 2>$null
@@ -57,23 +58,42 @@ while ($true) {
         }
 
         if ($activeDevice) {
-            # Query display power status
-            $wakefulness = & $adb -s $activeDevice shell "dumpsys power | grep 'mWakefulness='" 2>$null
+            $consecutiveFailures = 0
+
+            # Query display power status safely joining array to single string
+            $wakefulnessRaw = (& $adb -s $activeDevice shell "dumpsys power | grep 'mWakefulness='" 2>$null) -join " "
 
             # If device is asleep or dozing upon connection, wake it up
-            if ($wakefulness -notmatch "mWakefulness=Awake") {
+            if ($wakefulnessRaw -notmatch "mWakefulness=Awake") {
                 & $adb -s $activeDevice shell cmd power wakeup 2>$null
             }
 
-            # Pulse user activity keyevent to prevent lockscreen and idle timeouts
+            # Pulse gentle user activity keyevent (KEYCODE_UNKNOWN) to reset idle timeout
             & $adb -s $activeDevice shell input keyevent 0 2>$null
 
             Start-Sleep -Seconds $IntervalSec
         } else {
-            # Device disconnected: poll periodically with minimal CPU overhead
-            Start-Sleep -Seconds 2
+            # Device not seen in ADB. Check if Windows physically sees the phone via USB.
+            $pnpPhone = Get-PnpDevice -PresentOnly -ErrorAction SilentlyContinue | Where-Object { 
+                $_.FriendlyName -match "motorola|moto|android" -or $_.InstanceId -match "VID_22B8" 
+            }
+
+            if ($pnpPhone) {
+                # Phone is physically connected, but ADB server lost track of it.
+                $consecutiveFailures++
+                if ($consecutiveFailures -ge 3) {
+                    # Restart ADB server to recover stale socket
+                    & $adb reconnect 2>$null
+                    & $adb kill-server 2>$null
+                    Start-Sleep -Seconds 1
+                    & $adb start-server 2>$null
+                    $consecutiveFailures = 0
+                }
+            }
+
+            Start-Sleep -Seconds 3
         }
     } catch {
-        Start-Sleep -Seconds 3
+        Start-Sleep -Seconds 5
     }
 }

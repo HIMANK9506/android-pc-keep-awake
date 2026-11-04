@@ -24,10 +24,11 @@ If you only want your phone awake when plugged into **your own desk/laptop** (to
 
 1. **PC-Exclusive:** It looks specifically for your authorized Android device over USB.
 2. **Instant Reconnect Wake:** The second you plug your phone in, it immediately wakes the display.
-3. **Lockscreen Aware:** Overcomes the standard 5-to-8 second Android lock screen timeout by gently pulsing user-activity keep-alive signals.
-4. **Zero Lingering Side Effects:** Leaves the phone's global `stay_on_while_plugged_in` setting at `0` (factory default). As soon as you unplug, your phone automatically sleeps after your normal screen timeout (30s / 1m / 2m).
-5. **No 3rd-Party Phone Apps Needed:** Pure ADB-based automation. No apps running on your phone, no battery drain, no root required.
-6. **Featherweight:** Consumes **0.0% CPU** and less than **5 MB of RAM** on Windows.
+3. **Lockscreen Aware:** Overcomes standard Android lock screen timeouts by gently pulsing user-activity keep-alive signals.
+4. **Auto-Recovery on USB Replug:** Automatically handles rapid cable disconnects/reconnects and resets stale ADB server sockets if Windows drops the connection.
+5. **Zero Lingering Side Effects:** Leaves the phone's global `stay_on_while_plugged_in` setting at `0` (factory default). As soon as you unplug, your phone automatically sleeps after your normal screen timeout (30s / 1m / 2m).
+6. **No 3rd-Party Phone Apps Needed:** Pure ADB-based automation. No apps running on your phone, no battery drain, no root required.
+7. **Featherweight:** Consumes **0.0% CPU** and less than **5 MB of RAM** on Windows.
 
 ---
 
