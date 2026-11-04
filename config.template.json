@@ -1,0 +1,7 @@
+{
+  "targetDeviceId": "",
+  "intervalSeconds": 10,
+  "autoWakeOnConnect": true,
+  "enableLogging": true,
+  "maxLogSizeBytes": 1048576
+}
