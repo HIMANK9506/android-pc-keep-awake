@@ -1,0 +1,15 @@
+# Logs and temp files
+*.log
+*.txt
+*.tmp
+.phone-keep-awake/
+
+# Windows
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+$RECYCLE.BIN/
+
+# Visual Studio Code / IDEs
+.vscode/
+.idea/
